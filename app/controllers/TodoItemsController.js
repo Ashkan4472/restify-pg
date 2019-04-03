@@ -1,5 +1,6 @@
 const errors = require('restify-errors');
 const TodoItem = require('../models').TodoItem;
+const Todo = require('../models').Todo;
 
 module.exports = {
     create: (req, res, next) => {
@@ -15,14 +16,23 @@ module.exports = {
             return next(new errors.InvalidArgumentError(`you did't provide any id.`));
         }
 
-        TodoItem.create({
-            content: req.body.content,
-            todoId: req.params.todoId
-        }).then((todoItem) => {
-            res.send(todoItem);
-            next();
+        Todo.findByPk(todoId).then((todo) => {
+            if (!todo) {
+                return next(new errors.InvalidContentError(`Didn't find any todo with id ${todoId}`));
+            }
+
+            TodoItem.create({
+                content: content,
+                todoId: todo.id
+            }).then((todoItem) => {
+                res.send(todoItem);
+                next();
+            }).catch((err) => {
+                return next(new errors.InternalServerError(err));
+            });
+
         }).catch((err) => {
-            return next(new errors.InternalServerError(err));
+            return next(new errors.InvalidContentError(err));
         });
     },
 
