@@ -1,0 +1,23 @@
+version: '2'
+services:
+  db:
+    image: "postgres:11.2"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgData:/var/lib/psotgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD:
+      POSTGRES_DB: pg_development
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "1337:1337"
+    volumes:
+      - .:/restify-pg
+    environment:
+      DB_HOST: db
